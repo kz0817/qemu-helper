@@ -15,10 +15,11 @@ def net_user_param(args):
     )
 
 
-def nic_param(args):
+def tap_param(args):
+    # Todo: add interface to args.bridge_name
     return (
-        '-netdev',
-            'format=raw,file=%s,if=virtio' % args.disk_image
+        '-netdev','tap,id=netdev0',
+        '-device', 'virtio-net,netdev=netdev0'
     )
 
 
@@ -44,8 +45,8 @@ def generate(args):
     if args.net_user:
         cmd.extend(('-net', 'nic,model=virtio', '-net', 'user'))
 
-    if args.nic:
-        cmd.extend(nic_param(args))
+    if args.tap:
+        cmd.extend(tap_param(args))
 
     if args.cdrom:
         cmd.extend(('-cdrom', args.cdrom))
@@ -66,7 +67,7 @@ def start():
     parser.add_argument('-m', '--memory', default=1024)
     parser.add_argument('-d', '--disk-image')
     parser.add_argument('-u', '--net-user', action='store_true')
-    parser.add_argument('-n', '--nic')
+    parser.add_argument('-t', '--tap', action='store_true')
     parser.add_argument('-c', '--cdrom')
     parser.add_argument('-k', '--kernel', nargs='+')
     parser.add_argument('-i', '--initrd')
