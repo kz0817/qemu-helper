@@ -1,6 +1,41 @@
 #!/usr/bin/env python3
 import argparse
 import subprocess
+import shlex
+
+class Command(object):
+    def __init__(self):
+        self.__exec_arr = []
+        self.__show_arr = []
+
+
+    def __iadd__(self, arg):
+        if isinstance(arg, str):
+            arg_arr = (arg,)
+        else:
+            arg_arr = arg
+
+        for param in arg_arr:
+            self.__exec_arr.append(param)
+            self.__show_arr.append(self.__quote_if_needed(param))
+
+        return self
+
+
+    def __quote_if_needed(self, arg):
+        if ' ' not in arg:
+            return arg
+        escaped_arg = arg.replace("'", "\\'")
+        return "'%s'" % escaped_arg;
+
+
+    def __str__(self):
+        return ' '.join(self.__show_arr)
+
+
+    def get_arguments(self):
+        return self.__exec_arr
+
 
 def disk_image_param(args):
     return (
@@ -28,34 +63,35 @@ def kernel_param(args):
     s = ['-kernel', kernel_opt[0]]
     if len(kernel_opt) >= 2:
         s.append('-append')
-        s.extend([x for x in kernel_opt[1:]])
+        # Kernel option shall be handled as one parameter
+        s.append(' '.join([x for x in kernel_opt[1:]]))
     return s
 
 
 def generate(args):
-    cmd = []
-    cmd.append(args.qemu)
-    cmd.append('--enable-kvm')
-    cmd.extend(('-m', str(args.memory)))
-    cmd.append('-nographic')
+    cmd = Command()
+    cmd += args.qemu
+    cmd += '--enable-kvm'
+    cmd += (('-m', str(args.memory)))
+    cmd += '-nographic'
 
     if args.disk_image:
-        cmd.extend(disk_image_param(args))
+        cmd += disk_image_param(args)
 
     if args.net_user:
-        cmd.extend(('-net', 'nic,model=virtio', '-net', 'user'))
+        cmd += ('-net', 'nic,model=virtio', '-net', 'user')
 
     if args.tap:
-        cmd.extend(tap_param(args))
+        cmd += tap_param(args)
 
     if args.cdrom:
-        cmd.extend(('-cdrom', args.cdrom))
+        cmd += ('-cdrom', args.cdrom)
 
     if args.kernel:
-        cmd.extend(kernel_param(args))
+        cmd += kernel_param(args)
 
     if args.initrd:
-        cmd.extend(('-initrd', args.initrd))
+        cmd += ('-initrd', args.initrd)
 
     return cmd
 
@@ -75,10 +111,10 @@ def start():
     parser.add_argument('-e', '--execute', action='store_true')
 
     args = parser.parse_args()
-    cmd_arr = generate(args)
-    print(' '.join(cmd_arr))
+    cmd = generate(args)
+    print(cmd)
     if args.execute:
-        subprocess.run(cmd_arr)
+        subprocess.run(cmd.get_arguments())
 
 
 if __name__ == '__main__':
