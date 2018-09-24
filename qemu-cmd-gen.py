@@ -72,7 +72,7 @@ def generate(args):
     cmd = Command()
     cmd += args.qemu
     cmd += '--enable-kvm'
-    cmd += (('-m', str(args.memory)))
+    cmd += ('-m', str(args.memory))
     cmd += '-nographic'
 
     if args.disk_image:
