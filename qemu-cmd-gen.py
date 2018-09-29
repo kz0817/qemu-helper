@@ -81,7 +81,9 @@ def generate(args):
     cmd += args.qemu
     cmd += accel_param(args)
     cmd += ('-m', str(args.memory))
-    cmd += '-nographic'
+
+    if args.nographic:
+        cmd += '-nographic'
 
     if args.disk_image:
         cmd += disk_image_param(args)
@@ -115,6 +117,7 @@ def start():
     parser.add_argument('-c', '--cdrom')
     parser.add_argument('-k', '--kernel', nargs='+')
     parser.add_argument('-i', '--initrd')
+    parser.add_argument('-n', '--nographic', action='store_true')
 
     parser.add_argument('-e', '--execute', action='store_true')
 
