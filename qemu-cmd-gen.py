@@ -2,6 +2,7 @@
 import argparse
 import subprocess
 import shlex
+import platform
 
 class Command(object):
     def __init__(self):
@@ -68,10 +69,17 @@ def kernel_param(args):
     return s
 
 
+def accel_param(args):
+    return {
+        'Linux': '--enable-kvm',
+        'Darwin': ('-accel', 'hvf')
+    }[platform.system()]
+
+
 def generate(args):
     cmd = Command()
     cmd += args.qemu
-    cmd += '--enable-kvm'
+    cmd += accel_param(args)
     cmd += ('-m', str(args.memory))
     cmd += '-nographic'
 
