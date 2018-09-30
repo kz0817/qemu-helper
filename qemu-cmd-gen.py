@@ -114,7 +114,7 @@ def start():
         description='A tool for generating QEMU comand lines.')
     parser.add_argument('--qemu', default='qemu-system-x86_64')
     parser.add_argument('-s', '--smp', type=int)
-    parser.add_argument('-m', '--memory', default=1024)
+    parser.add_argument('-m', '--memory', type=int, default=1024)
     parser.add_argument('-d', '--disk-image')
     parser.add_argument('-u', '--net-user', action='store_true')
     parser.add_argument('-t', '--tap', action='store_true')
