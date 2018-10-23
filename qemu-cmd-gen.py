@@ -106,6 +106,9 @@ def generate(args):
     if args.initrd:
         cmd += ('-initrd', args.initrd)
 
+    if args.boot:
+        cmd += ('-boot', args.boot)
+
     return cmd
 
 
@@ -122,6 +125,7 @@ def start():
     parser.add_argument('-k', '--kernel', nargs='+')
     parser.add_argument('-i', '--initrd')
     parser.add_argument('-n', '--nographic', action='store_true')
+    parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
 
     parser.add_argument('-e', '--execute', action='store_true')
 
