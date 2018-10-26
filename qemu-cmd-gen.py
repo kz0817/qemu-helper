@@ -79,7 +79,8 @@ def accel_param(args):
 def generate(args):
     cmd = Command()
     cmd += args.qemu
-    cmd += accel_param(args)
+    if not args.no_accel:
+        cmd += accel_param(args)
     cmd += ('-m', str(args.memory))
 
     if args.smp is not None:
@@ -117,6 +118,7 @@ def start():
         description='A tool for generating QEMU comand lines.')
     parser.add_argument('--qemu', default='qemu-system-x86_64')
     parser.add_argument('-s', '--smp', type=int)
+    parser.add_argument('-A', '--no-accel', action='store_true')
     parser.add_argument('-m', '--memory', type=int, default=1024)
     parser.add_argument('-d', '--disk-image')
     parser.add_argument('-u', '--net-user', action='store_true')
