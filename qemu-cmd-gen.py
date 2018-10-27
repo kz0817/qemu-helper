@@ -38,10 +38,10 @@ class Command(object):
         return self.__exec_arr
 
 
-def disk_image_param(args):
+def disk_image_param(disk_image):
     return (
         '-drive',
-        'format=raw,file=%s,if=virtio' % args.disk_image
+        'format=raw,file=%s,if=virtio' % disk_image
     )
 
 
@@ -89,8 +89,8 @@ def generate(args):
     if args.nographic:
         cmd += '-nographic'
 
-    if args.disk_image:
-        cmd += disk_image_param(args)
+    for disk_image in args.disk_images:
+        cmd += disk_image_param(disk_image)
 
     if args.net_user:
         cmd += ('-net', 'nic,model=virtio', '-net', 'user')
@@ -123,7 +123,7 @@ def start():
     parser.add_argument('-s', '--smp', type=int)
     parser.add_argument('-A', '--no-accel', action='store_true')
     parser.add_argument('-m', '--memory', type=int, default=1024)
-    parser.add_argument('-d', '--disk-image')
+    parser.add_argument('-d', '--disk-images', action='append')
     parser.add_argument('-u', '--net-user', action='store_true')
     parser.add_argument('-t', '--tap', action='store_true')
     parser.add_argument('-c', '--cdrom')
