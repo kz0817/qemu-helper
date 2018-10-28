@@ -123,7 +123,7 @@ def start():
     parser.add_argument('-s', '--smp', type=int)
     parser.add_argument('-A', '--no-accel', action='store_true')
     parser.add_argument('-m', '--memory', type=int, default=1024)
-    parser.add_argument('-d', '--disk-images', action='append')
+    parser.add_argument('-d', '--disk-images', action='append', default=[])
     parser.add_argument('-u', '--net-user', action='store_true')
     parser.add_argument('-t', '--tap', action='store_true')
     parser.add_argument('-c', '--cdrom')
