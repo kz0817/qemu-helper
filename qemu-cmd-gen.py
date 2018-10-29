@@ -110,6 +110,9 @@ def generate(args):
     if args.boot:
         cmd += ('-boot', args.boot)
 
+    if args.gdb:
+        cmd += ('-gdb', args.gdb)
+
     if args.monitor:
         cmd += ('-monitor', args.monitor)
 
@@ -132,6 +135,7 @@ def start():
     parser.add_argument('-n', '--nographic', action='store_true')
     parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
+    parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
 
     parser.add_argument('-e', '--execute', action='store_true')
 
