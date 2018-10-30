@@ -116,6 +116,9 @@ def generate(args):
     if args.monitor:
         cmd += ('-monitor', args.monitor)
 
+    for arg in args.additional:
+        cmd += arg
+
     return cmd
 
 
@@ -138,6 +141,8 @@ def start():
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
 
     parser.add_argument('-e', '--execute', action='store_true')
+
+    parser.add_argument('additional', nargs='*')
 
     args = parser.parse_args()
     cmd = generate(args)
