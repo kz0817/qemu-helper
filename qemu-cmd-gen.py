@@ -76,6 +76,13 @@ def accel_param(args):
     }[platform.system()]
 
 
+def usb_param(args):
+    return (
+        '-usb','-device',
+        'usb-host,hostbus=%d,hostaddr=%d' % (args.usb[0], args.usb[1])
+    )
+
+
 def generate(args):
     cmd = Command()
     cmd += args.qemu
@@ -116,6 +123,9 @@ def generate(args):
     if args.monitor:
         cmd += ('-monitor', args.monitor)
 
+    if args.usb:
+        cmd += usb_param(args)
+
     for arg in args.additional:
         cmd += arg
 
@@ -139,6 +149,7 @@ def start():
     parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
+    parser.add_argument('-usb', nargs=2, type=int, help='Bus and Devices (can be found in output of lsusb)')
 
     parser.add_argument('-e', '--execute', action='store_true')
 
