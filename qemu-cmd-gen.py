@@ -52,12 +52,21 @@ def net_user_param(args):
 
 
 def tap_param(args):
-    # Todo: add interface to args.bridge_name
     return (
         '-netdev','tap,id=netdev0',
         '-device', 'virtio-net,netdev=netdev0'
     )
 
+def bridge_param(args):
+    s = []
+    helper = '/usr/lib/qemu/qemu-bridge-helper'
+    for i, brname in enumerate(args.bridges):
+        s.extend((
+            '-netdev',
+            'bridge,id=brdev%d,br=%s,helper=%s' % (i, brname, helper),
+            '-device', 'virtio-net,netdev=brdev%d' % i
+        ))
+    return s
 
 def kernel_param(args):
     kernel_opt = args.kernel
@@ -78,7 +87,8 @@ def accel_param(args):
 
 def usb_param(args):
     return (
-        '-usb','-device',
+        '-usb','-device', 'usb-ehci,id=ehci',
+        '-device',
         'usb-host,hostbus=%d,hostaddr=%d' % (args.usb[0], args.usb[1])
     )
 
@@ -126,6 +136,9 @@ def generate(args):
     if args.usb:
         cmd += usb_param(args)
 
+    if args.bridges:
+        cmd += bridge_param(args)
+
     for arg in args.additional:
         cmd += arg
 
@@ -142,6 +155,11 @@ def start():
     parser.add_argument('-d', '--disk-images', action='append', default=[])
     parser.add_argument('-u', '--net-user', action='store_true')
     parser.add_argument('-t', '--tap', action='store_true')
+    parser.add_argument('-B', '--bridges', action='append',
+                        help='bridge names in which created taps are added')
+    # This default path is for Ubuntu
+    parser.add_argument('-H', '--bridge-helper',
+                        default='/usr/lib/qemu/qemu-bridge-helpera')
     parser.add_argument('-c', '--cdrom')
     parser.add_argument('-k', '--kernel', nargs='+')
     parser.add_argument('-i', '--initrd')
@@ -149,7 +167,7 @@ def start():
     parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
-    parser.add_argument('-usb', nargs=2, type=int, help='Bus and Devices (can be found in output of lsusb)')
+    parser.add_argument('-usb', nargs=2, type=int, help='Bus and Devices (can be found in output of lsusbj')
 
     parser.add_argument('-e', '--execute', action='store_true')
 
