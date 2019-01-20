@@ -118,6 +118,9 @@ def generate(args):
     if args.cdrom:
         cmd += ('-cdrom', args.cdrom)
 
+    if args.sound:
+        cmd += ('-soundhw', args.sound)
+
     if args.kernel:
         cmd += kernel_param(args)
 
@@ -161,6 +164,7 @@ def start():
     parser.add_argument('-H', '--bridge-helper',
                         default='/usr/lib/qemu/qemu-bridge-helpera')
     parser.add_argument('-c', '--cdrom')
+    parser.add_argument('-a', '--sound', type=str, nargs='?', default=None, const='ac97')
     parser.add_argument('-k', '--kernel', nargs='+')
     parser.add_argument('-i', '--initrd')
     parser.add_argument('-n', '--nographic', action='store_true')
