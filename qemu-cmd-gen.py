@@ -46,8 +46,11 @@ def disk_image_param(disk_image):
 
 
 def net_user_param(args):
+    fmt = ',hostfwd=tcp::%s-:%s'
+    fwd_list = [fmt % tuple(ports.split(',')) for ports in args.host_forward]
+    print(fwd_list)
     return (
-        '-net', 'nic,model=virtio -net user'
+        '-net', 'nic,model=virtio', '-net', 'user%s' % ''.join(fwd_list)
     )
 
 
@@ -110,7 +113,7 @@ def generate(args):
         cmd += disk_image_param(disk_image)
 
     if args.net_user:
-        cmd += ('-net', 'nic,model=virtio', '-net', 'user')
+        cmd += net_user_param(args)
 
     if args.tap:
         cmd += tap_param(args)
@@ -157,6 +160,8 @@ def start():
     parser.add_argument('-m', '--memory', type=int, default=1024)
     parser.add_argument('-d', '--disk-images', action='append', default=[])
     parser.add_argument('-u', '--net-user', action='store_true')
+    parser.add_argument('-f', '--host-forward', action='append', default=[],
+      help='host_port,guest_port, Use with -u option.')
     parser.add_argument('-t', '--tap', action='store_true')
     parser.add_argument('-B', '--bridges', action='append',
                         help='bridge names in which created taps are added')
