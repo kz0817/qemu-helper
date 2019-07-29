@@ -1,5 +1,5 @@
-# qemu-helper
-A helper utilities to use QEMU. This software creates a command line or executes it. Users only give a basic paramters such as memory size, a disk image file, a CD image file and so on. Complicated parameters are automatically generated. 
+# Brief
+QEMU is highly functional and has many flexible and complicated command line paramters. I often forget them and have had to look into the manual. This software creates a command line of QEMU (and optionally executes it) from some basic paramters such as memory size, a disk image file, a CD image file and so on.
 
 # Example to run
 
