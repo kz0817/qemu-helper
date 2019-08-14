@@ -27,6 +27,14 @@ In Ubuntu, edit `GRUB_CMDLINE_LINUX` in /etc/default/grub and run the following 
 
    grub-mkconfig > /boot/grub/grub.cfg
 
+## Enable a debug feature of sysrq
+
+   echo 1 > /proc/sys/kernel/sysrq
+
+or set any value containing 0x8.
+
+Editing /etc/sysctl.d/10-magic-sysrq.conf sets the value on boot.
+
 
 # Attach to the kernel with GDB
 
