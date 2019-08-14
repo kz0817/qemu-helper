@@ -136,6 +136,9 @@ def generate(args):
     if args.gdb:
         cmd += ('-gdb', args.gdb)
 
+    if args.serial:
+        cmd += ('-serial', args.serial)
+
     if args.monitor:
         cmd += ('-monitor', args.monitor)
 
@@ -176,6 +179,7 @@ def start():
     parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
+    parser.add_argument('-S', '--serial', choices=['mon:stdio', 'pts'])
     parser.add_argument('-usb', nargs=2, type=int, help='Bus and Devices (can be found in output of lsusbj')
 
     parser.add_argument('-e', '--execute', action='store_true')
