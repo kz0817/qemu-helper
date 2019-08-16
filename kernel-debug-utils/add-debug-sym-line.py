@@ -26,9 +26,9 @@ def get_latter_module_path(name, kernel_version):
     assert words[0:3] == ['', 'lib', 'modules']
     fixed_path = words[0:3]
     if kernel_version is None:
-        kernel_version = words[4]
+        kernel_version = words[3]
     fixed_path += [kernel_version]
-    fixed_path += words[5:]
+    fixed_path += words[4:]
     return '/'.join(fixed_path)
 
 
