@@ -8,12 +8,14 @@ has to include the address, which can be obtained from /sys/
 
 # Example to use (for Ubuntu)
 
-First generate GDB's command list file like.
+First generate GDB's commands on the target machine like
 
-    lsmod | add-debug-sym-line.py -k 4.15.0-54-generic/kernel > add.cmd
+    lsmod | sudo ./add-debug-sym-line.py > add.cmd
 
-The above command should be executed on the target machine, because it reads
-/sys and run lsmod.
+or from remote machine via SSH.
+
+    ssh target sh -c "lsmod | sudo qemu-helper/kernel-debug-utils/add-debug-sym-line.py" > add.cmd
+
 
 Then execute the command generated above on GDB.
 
