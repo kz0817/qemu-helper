@@ -20,4 +20,4 @@ The above command line forwards host's 8022 port to guest's 22 port.
 # Setting qemu-bridge-helper for Ubuntu 18.04
 
     sudo mkdir /etc/qemu
-    echo "allow all" | sudo tee /etc/quemu/bridge.conf
+    echo "allow all" | sudo tee /etc/qemu/bridge.conf
