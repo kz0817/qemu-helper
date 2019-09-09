@@ -39,9 +39,11 @@ class Command(object):
 
 
 def disk_image_param(disk_image):
+    ext = disk_image.split('.')[-1]
+    fmt = {'qcow2': 'qcow2'}.get(ext, 'raw')
     return (
         '-drive',
-        'format=raw,file=%s,if=virtio' % disk_image
+        'format=%s,file=%s,if=virtio' % (fmt, disk_image)
     )
 
 
