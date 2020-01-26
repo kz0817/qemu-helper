@@ -132,8 +132,13 @@ def generate(args):
     if args.initrd:
         cmd += ('-initrd', args.initrd)
 
-    if args.boot:
-        cmd += ('-boot', args.boot)
+    if args.boot or args.menu:
+        param = []
+        if args.boot:
+            param += [args.boot]
+        if args.menu:
+            param += ['menu=on']
+        cmd += ('-boot', ','.join(param))
 
     if args.gdb:
         cmd += ('-gdb', args.gdb)
@@ -179,6 +184,8 @@ def start():
     parser.add_argument('-i', '--initrd')
     parser.add_argument('-n', '--nographic', action='store_true')
     parser.add_argument('-b', '--boot', help='c: HDD, d: CDROM')
+    parser.add_argument('--menu', action='store_true',
+                        help='Show menu at boot up')
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
     parser.add_argument('-S', '--serial', choices=['mon:stdio', 'pts'])
