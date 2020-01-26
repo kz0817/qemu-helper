@@ -4,6 +4,8 @@ import subprocess
 import shlex
 import platform
 
+OPT_VNC_HELP = 'VNC number N. The port number: 5900 + N'
+
 class Command(object):
     def __init__(self):
         self.__exec_arr = []
@@ -149,6 +151,9 @@ def generate(args):
     if args.monitor:
         cmd += ('-monitor', args.monitor)
 
+    if args.vnc is not None:
+        cmd += ('-vnc', ':%s' %args.vnc)
+
     if args.usb:
         cmd += usb_param(args)
 
@@ -189,6 +194,7 @@ def start():
     parser.add_argument('-M', '--monitor', nargs='?', const='stdio')
     parser.add_argument('-g', '--gdb', nargs='?', const='tcp::1234')
     parser.add_argument('-S', '--serial', choices=['mon:stdio', 'pts'])
+    parser.add_argument('-vnc', type=int, help=OPT_VNC_HELP)
     parser.add_argument('-usb', nargs=2, type=int, help='Bus and Devices (can be found in output of lsusbj')
 
     parser.add_argument('-e', '--execute', action='store_true')
