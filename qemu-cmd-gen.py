@@ -45,7 +45,8 @@ disable graphic and add a serial port redirected to the console
 OPT_BOOT_HELP = 'boot from DRIVE. DRIVE be c (Drive) or d (CD-ROM)'
 OPT_MENU_HELP = 'show a menu to select a boot device at BIOS screen'
 OPT_MONITOR_HELP = '''
-set the monitor device to DEV. If DEV is omitted, %s is used.
+set the monitor device to DEV. If DEV is omitted, %s is used. When using
+stdio, you can switch monitor/output by ctrl-a c
 ''' % DEFAULT_MONITOR_DEV
 OPT_GDB_HELP = '''
 start GDB server with the specified PORT or default: %s
