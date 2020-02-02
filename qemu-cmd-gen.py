@@ -14,6 +14,9 @@ DEFAULT_MONITOR_DEV = 'stdio'
 OPT_QEMU_HELP = 'use QEMU as a command (Default: %s)' % DEFAULT_QEMU
 OPT_SMP_HELP = 'The number of CPUs (Default: %d)' % DEFAULT_NUM_CPU
 OPT_MEMORY_HELP = 'set memory size to M KiB (Default: %d)' % DEFAULT_MEM_SIZE
+OPT_DRIVE_HELP = '''
+'add FILE as a drive. Avaliable OPT: scsi (default virtio)')
+'''
 OPT_NET_USER_HELP='create a NIC connected to user (private) network with NAT'
 OPT_HOST_FWD_HELP = '''
 forward a host port to guest. PORTS: host_port,guest_port (Ex: -f 8022,22).
@@ -65,6 +68,32 @@ Ex: qemu-cmd-gen.py -d drive.img -- -vnc :0
 QEMU options can be seen at https://linux.die.net/man/1/qemu-kvm
 '''
 
+class Context:
+    def __init__(self):
+        self.have_scsi_dev = False
+        self.name_count_map = {}
+
+    def get_name(self, name_key):
+        count = self.name_count_map.get(name_key)
+        if count is None:
+            count = 0
+        else:
+            count += 1
+        self.name_count_map[name_key] = count
+        return '%s%d' % (name_key, count)
+
+    def create_scsi_device_if_needed(self):
+        if self.have_scsi_dev:
+            return []
+        self.have_scsi_dev = True
+        return ('-device', 'virtio-scsi-pci')
+
+    def create_scsi_hd(self, drive_name):
+        return ('-device', 'scsi-hd,drive=%s' % drive_name)
+
+
+ctx = Context()
+
 class Command(object):
     def __init__(self):
         self.__exec_arr = []
@@ -99,14 +128,31 @@ class Command(object):
         return self.__exec_arr
 
 
-def disk_image_param(disk_image):
-    ext = disk_image.split('.')[-1]
+def drive_image_param(drive):
+
+    interface = None
+    cmd = []
+    drive_id = ctx.get_name('drive')
+
+    drive_img = drive[0]
+    for param in drive[1:]:
+        if param == 'scsi':
+            cmd += ctx.create_scsi_device_if_needed()
+            cmd += ctx.create_scsi_hd(drive_id)
+            interface = 'none'
+        else:
+            assert False, 'Unknown parameter: %s' % param
+
+    ext = drive_img.split('.')[-1]
     fmt = {'qcow2': 'qcow2'}.get(ext, 'raw')
-    interface = {'fd': 'pflash'}.get(ext, 'virtio')
-    return (
+    if interface is None:
+        interface = {'fd': 'pflash'}.get(ext, 'virtio')
+
+    cmd += [
         '-drive',
-        'format=%s,file=%s,if=%s' % (fmt, disk_image, interface)
-    )
+        'id=%s,format=%s,file=%s,if=%s' % (drive_id, fmt, drive_img, interface)
+    ]
+    return cmd
 
 
 def net_user_param(args):
@@ -173,8 +219,8 @@ def generate(args):
     if args.nographic:
         cmd += '-nographic'
 
-    for disk_image in args.disk_images:
-        cmd += disk_image_param(disk_image)
+    for drive in args.drive:
+        cmd += drive_image_param(drive)
 
     if args.net_user:
         cmd += net_user_param(args)
@@ -228,6 +274,7 @@ def generate(args):
 
 def start():
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description='A tool for generating QEMU comand lines.')
     parser.add_argument('--qemu', default=DEFAULT_QEMU, help=OPT_QEMU_HELP)
     parser.add_argument('-s', '--smp', type=int, metavar='N', help=OPT_SMP_HELP)
@@ -235,8 +282,9 @@ def start():
                         help='disable accelaration such KVM')
     parser.add_argument('-m', '--memory', type=int, default=DEFAULT_MEM_SIZE,
                         metavar='M', help=OPT_MEMORY_HELP)
-    parser.add_argument('-d', '--disk-images', action='append', default=[],
-                        metavar='FILE', help='add FILE as a drive')
+    parser.add_argument('-d', '--drive', nargs='+', action='append',
+                        default=[],
+                        metavar=('FILE', 'OPT'), help=OPT_DRIVE_HELP)
     parser.add_argument('-u', '--net-user', action='store_true',
                         help=OPT_NET_USER_HELP)
     parser.add_argument('-f', '--host-forward', action='append', default=[],
