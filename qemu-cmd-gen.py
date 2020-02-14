@@ -209,6 +209,7 @@ def usb_param(args):
 def generate(args):
     cmd = Command()
     cmd += args.qemu
+    cmd += ('-cpu', 'host')
     if not args.no_accel:
         cmd += accel_param(args)
     cmd += ('-m', str(args.memory))
