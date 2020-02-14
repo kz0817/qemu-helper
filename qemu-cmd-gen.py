@@ -32,7 +32,7 @@ create NICs connected to host bridges. BR is a list of the bridges
 OPT_BRIDGE_HELPER_HELP = '''
 A bridge helper program which connects a VM's tap to a host bridge.
 (Default: /usr/lib/qemu/qemu-bridge-helper)
-Note: a root privilege is typicall required to use this option.
+Note: a root privilege is typically required to use this option.
 '''
 OPT_SOUND_HELP = '''
 add a sound card. DEVICE is a sound card (default: %s).
