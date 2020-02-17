@@ -55,6 +55,9 @@ OPT_GDB_HELP = '''
 start GDB server with the specified PORT or default: %s
 ''' % DEFAULT_GDB_PORT
 OPT_VNC_HELP = 'open VNC service. port: 5900 + N'
+OPT_WAIT_HELP = '''
+wait at the beginning. To continue, input "cont" or "c" in monitor console.
+'''
 OPT_USB_HELP = '''
 add a Host's USB device whose BUS and DEV can be found in output of "lsusb"
 '''
@@ -261,6 +264,9 @@ def generate(args):
     if args.vnc is not None:
         cmd += ('-vnc', ':%s' %args.vnc)
 
+    if args.wait:
+        cmd += ['-S']
+
     if args.usb:
         cmd += usb_param(args)
 
@@ -318,6 +324,7 @@ def start():
     parser.add_argument('-S', '--serial', choices=['mon:stdio', 'pts'],
                         help='add a serial port')
     parser.add_argument('-vnc', type=int, metavar='N', help=OPT_VNC_HELP)
+    parser.add_argument('-W', '--wait', action='store_true', help=OPT_WAIT_HELP)
     parser.add_argument('-usb', nargs=2, type=int, metavar=('BUS', 'DEV'),
                         help=OPT_USB_HELP)
 
