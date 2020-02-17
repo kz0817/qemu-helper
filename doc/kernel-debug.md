@@ -44,3 +44,22 @@ Example:
 
     (gdb) target remote localhost:1234
 
+
+# How to use crash utility on Ubuntu
+
+## Install the package
+
+    apt install crash
+
+## Example to launch in live mode
+
+    crash /usr/lib/debug/boot/vmlinux-4.15.0-54-generic
+
+## Example to show a value of a variable
+
+    crash> p/x jiffies
+
+## Commands
+- sym: show an address of a symbol
+- rd: read memory content at specified address
+- struct: show contents in the specified structure
