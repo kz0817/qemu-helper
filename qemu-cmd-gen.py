@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import shlex
 import platform
+import sys
 
 DEFAULT_QEMU = 'qemu-system-x86_64'
 DEFAULT_NUM_CPU = 1
@@ -327,17 +328,29 @@ def start():
     parser.add_argument('-W', '--wait', action='store_true', help=OPT_WAIT_HELP)
     parser.add_argument('-usb', nargs=2, type=int, metavar=('BUS', 'DEV'),
                         help=OPT_USB_HELP)
+    parser.add_argument('--sudo', action='store_true',
+                        help='execute via sudo')
 
     parser.add_argument('-e', '--execute', action='store_true',
                         help=OPT_EXEC_HELP)
 
     parser.add_argument('additional', nargs='*', help=OPT_ADDITIONAL_HELP)
 
+    # This is for internal use
+    parser.add_argument('--subprocess', action='store_true',
+                        help=argparse.SUPPRESS)
+
     args = parser.parse_args()
-    cmd = generate(args)
+    if args.sudo and not args.subprocess:
+        cmd = ['sudo']
+        cmd.extend(sys.argv)
+        cmd.append('--subprocess')
+    else:
+        cmd = generate(args).get_arguments()
+
     print(cmd)
     if args.execute:
-        subprocess.run(cmd.get_arguments())
+        subprocess.run(cmd)
 
 
 if __name__ == '__main__':
