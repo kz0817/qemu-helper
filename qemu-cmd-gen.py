@@ -4,6 +4,8 @@ import subprocess
 import shlex
 import platform
 import sys
+import os
+import random
 
 DEFAULT_QEMU = 'qemu-system-x86_64'
 DEFAULT_NUM_CPU = 1
@@ -11,6 +13,8 @@ DEFAULT_MEM_SIZE = 1024
 DEFAULT_GDB_PORT = 'tcp::1234'
 DEFAULT_SOUND_DEV = 'ac97'
 DEFAULT_MONITOR_DEV = 'stdio'
+
+NO_MAC_FILE='__NO_MAC_FILE'
 
 OPT_QEMU_HELP = 'use QEMU as a command (Default: %s)' % DEFAULT_QEMU
 OPT_SMP_HELP = 'The number of CPUs (Default: %d)' % DEFAULT_NUM_CPU
@@ -25,8 +29,12 @@ use with -u option.
 '''
 OPT_TAP_HELP = '''
 create a NIC connected to the host's standard bridge.
-To use this option, a root privilege is required
-'''
+To use this option, a root privilege is required.
+When MAC_FILE is specified and the file exists, this script reads a mac
+address from the file.
+When it doesn't and -e option is specified, the file is automatically.
+The file name `%s` cannot used.
+''' % NO_MAC_FILE
 OPT_BRIDGES_HELP = '''
 create NICs connected to host bridges. BR is a list of the bridges
 '''
@@ -72,10 +80,52 @@ Ex: qemu-cmd-gen.py -d drive.img -- -vnc :0
 QEMU options can be seen at https://linux.die.net/man/1/qemu-kvm
 '''
 
+class MacAddr(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self.file_existing = os.path.exists(filename)
+        if self.file_existing:
+            self.mac = self.read_mac_file(filename)
+        else:
+            self.mac = self.generate_mac()
+
+    def save_if_needed(self):
+        print(self.filename)
+        if self.filename is None or \
+           self.filename == NO_MAC_FILE or \
+           self.file_existing:
+            return
+
+        with open(self.filename, 'w') as f:
+            f.write(self.mac)
+        print('Saved MAC: %s' % self.filename)
+
+    @staticmethod
+    def read_mac_file(filename):
+        with open(filename) as f:
+            mac = f.read().strip()
+        MacAddr.validate(mac)
+        return mac
+
+    @staticmethod
+    def generate_mac():
+        arr = [0x02] + [random.randint(0,255) for i in range(5)]
+        return ':'.join(['%02x' % n for n in arr])
+
+    @staticmethod
+    def validate(mac):
+        arr = mac.split(':')
+        assert len(arr) == 6
+        for n in arr:
+            assert len(n) == 2
+            assert int(n, 16) is not None
+
+
 class Context:
     def __init__(self):
         self.have_scsi_dev = False
         self.name_count_map = {}
+        self.mac_list = []
 
     def get_name(self, name_key):
         count = self.name_count_map.get(name_key)
@@ -167,11 +217,10 @@ def net_user_param(args):
         '-net', 'nic,model=virtio', '-net', 'user%s' % ''.join(fwd_list)
     )
 
-
-def tap_param(args):
+def tap_param(args, mac):
     return (
         '-netdev','tap,id=netdev0',
-        '-device', 'virtio-net,netdev=netdev0'
+        '-device', 'virtio-net,netdev=netdev0,mac=%s' % mac.mac
     )
 
 def bridge_param(args):
@@ -231,7 +280,9 @@ def generate(args):
         cmd += net_user_param(args)
 
     if args.tap:
-        cmd += tap_param(args)
+        mac = MacAddr(args.tap)
+        cmd += tap_param(args, mac)
+        ctx.mac_list .append(mac)
 
     if args.cdrom:
         cmd += ('-cdrom', args.cdrom)
@@ -298,7 +349,9 @@ def start():
     parser.add_argument('-f', '--host-forward', action='append', default=[],
                         metavar='PORTS',
                         help=OPT_HOST_FWD_HELP)
-    parser.add_argument('-t', '--tap', action='store_true', help=OPT_TAP_HELP)
+    parser.add_argument('-t', '--tap', nargs='?', metavar=('MAC_FILE'),
+                        const=NO_MAC_FILE,
+                        help=OPT_TAP_HELP)
     parser.add_argument('-B', '--bridges', action='append', metavar='BR',
                         help=OPT_BRIDGES_HELP)
     # This default path is for Ubuntu
@@ -350,6 +403,8 @@ def start():
 
     print(cmd)
     if args.execute:
+        for mac in ctx.mac_list:
+            mac.save_if_needed()
         subprocess.run(cmd)
 
 
